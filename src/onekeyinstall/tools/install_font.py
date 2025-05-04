@@ -1,0 +1,28 @@
+
+
+
+
+from onekeyinstall.installer import Installer
+from onekeyinstall.registry import ToolRegistry
+
+
+
+
+class InstallFiraCodeNerdFont(Installer):
+    
+    PACKAGE_NAME = "fonts-firacode"
+
+    def install(self):        
+        self.pm_executor.install(self.PACKAGE_NAME)
+
+    
+    def uninstall(self):
+        self.pm_executor.remove(self.PACKAGE_NAME)
+
+
+
+
+if __name__ == "__main__":
+
+    InstallFiraCodeNerdFont().install()
+    InstallFiraCodeNerdFont().uninstall()

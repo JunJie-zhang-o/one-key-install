@@ -1,0 +1,23 @@
+{
+    "terminal.integrated.env.windows": {
+        "PYTHONPATH":"${workspaceFolder}:${workspaceFolder}/",
+        "WORKSPACEPATH":"${workspaceFolder}",
+        "PYTHONDONTWRITEBYTECODE":"1",
+    },
+    "terminal.integrated.env.osx": {
+        "PYTHONPATH":"${workspaceFolder}:${workspaceFolder}/",
+        "WORKSPACEPATH":"${workspaceFolder}",
+        "PYTHONDONTWRITEBYTECODE":"1",
+    },
+    "terminal.integrated.env.linux": {
+        "PYTHONPATH":"${workspaceFolder}:${workspaceFolder}/",
+        "WORKSPACEPATH":"${workspaceFolder}",
+        "PYTHONDONTWRITEBYTECODE":"1",
+    },
+
+
+    "black-formatter.args": [
+        "--line-length", "120",   // 设置每行的最大字符数
+        "--fast"  // 加速模式，忽略复杂的格式化
+    ],
+}

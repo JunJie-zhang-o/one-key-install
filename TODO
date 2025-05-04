@@ -1,0 +1,32 @@
+
+
+
+>= python3.6
+
+安装：
+    ☐ ZSH
+    ☐ miniconda
+    ☐ 换系统源
+    ☐ VSCode
+    ☐ Edge/Google
+    ☐ 字体安装 Fira
+    ☐ localsend
+    ☐ snipaste
+    ☐ terminator
+    ☐ 基础工具集
+    ☐ wechat
+    ☐ feishu
+    ☐ mujoco
+    ☐ plotjuggcy
+    ☐ 换pip源
+
+
+对于一些软件可以安装到用户文件夹的目录下
+
+
+
+依赖分析
+
+下载
+
+安装+执行钩子脚本
