@@ -156,25 +156,28 @@ class ShellExecutor:
             stdout_lines = []
             stderr_lines = []
 
-            while True:
-
-                ret = select.select([process.stdout, process.stderr], [], [])
+            while self.capture_output:
+            
+                ret = select.select([process.stdout, process.stderr], [], [], 0.1)
 
                 for fd in ret[0]:
-                    line = process.stdout.readline()
+                    # line = process.stdout.readline()
+                    line = fd.readline()
                     if line:
                         if self.verbose:
-                            print(f"[stdout] {line.strip()}")
+                            # print(f"[stdout] {line.strip()}")
+                            prefix = "[stdout]" if fd == process.stdout else "[stderr]"
+                            print(f"{prefix} {line.strip()}")
                         if self.capture_output:
-                            stdout_lines.append(line)
-                    if fd == process.stderr.fileno():
-                        line = process.stderr.readline()
-                        if line:
-                            if self.verbose:
-                                print(f"[stderr] {line.strip()}")
-                            if self.capture_output:
-                                stderr_lines.append(line)
-
+                            stdout_lines.append(line) if fd == process.stdout else stderr_lines.append(line)
+                    # if fd == process.stderr.fileno():
+                    #     line = process.stderr.readline()
+                    #     if line:
+                    #         if self.verbose:
+                    #             print(f"[stderr] {line.strip()}")
+                    #         if self.capture_output:
+                    #             stderr_lines.append(line)
+                print("running")
                 if process.poll() is not None:
                     break
 
@@ -184,7 +187,7 @@ class ShellExecutor:
             if self.check and returncode != 0:
                 raise subprocess.CalledProcessError(returncode, cmd)
 
-            return result
+            return returncode
         except subprocess.CalledProcessError as e:
             print(f"命令执行失败: {e}")
             return e
@@ -195,6 +198,21 @@ class ShellExecutor:
 
 
 # 配置文件
+
+
+
+
+# 检查是否已经安装
+import shutil
+def check_installation(package_name):
+    """
+    检查是否已经安装指定软件包
+    """
+    if shutil.which(package_name):
+        return True
+    else:
+        return False
+
 
 
 if __name__ == '__main__':
