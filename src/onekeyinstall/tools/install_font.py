@@ -3,11 +3,11 @@
 
 
 from onekeyinstall.installer import Installer
-from onekeyinstall.registry import ToolRegistry
+from onekeyinstall.registry import register
 
 
 
-
+@register("font.fira-code-nerd-font")
 class InstallFiraCodeNerdFont(Installer):
     
     PACKAGE_NAME = "fonts-firacode"

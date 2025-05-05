@@ -3,8 +3,12 @@ from onekeyinstall.registry import ToolRegistry
 
 
 
+from onekeyinstall.registry import register
 
-class InstallFiraCodeNerdFont(Installer):
+
+
+@register("terminal.terminator")
+class InstallTerminator(Installer):
     
     PACKAGE_NAME = "terminator"
 
