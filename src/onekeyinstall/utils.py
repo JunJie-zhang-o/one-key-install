@@ -64,6 +64,7 @@ class System:
     def __linux_info(self):
         with open("/etc/os-release") as f:
             os_release = dict(line.strip().replace("\"", "").split("=", 1) for line in f if "=" in line)
+            # todo 添加一个属性是哪个大类的linux发行版,便于识别文件下载的类型
         return os_release["NAME"].lower(), os_release["VERSION"]
     
 
