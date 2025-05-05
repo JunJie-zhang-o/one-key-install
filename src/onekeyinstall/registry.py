@@ -2,31 +2,50 @@
 
 
 # yourcli/registry.py
+from dataclasses import dataclass
+from typing import List
+
+import functools
+
+
+
+
 class ToolRegistry:
     _commands = {}
+
 
     @classmethod
     def register(cls, name: str, command_cls):
 
-        if name.find(".") >= 0:
-            pre, post = name.split(".")
-            if pre not in cls._commands:
-                cls._commands[pre] = {}
-                cls._commands[pre][post] = command_cls
-            elif pre in cls._commands and post not in cls._commands[pre]:
-                cls._commands[pre][post] = command_cls
-            else:
-                raise ValueError(f"{name} is already registered")
-        else:
-            if name not in cls._commands:
-                cls._commands[name] = command_cls
-            else:
-                raise ValueError(f"{name} is already registered")
-    
+        def _dict_set(keys: List[str], value):
+            _keys = []
+            _commands_dict = cls._commands
+            for key in keys:
+                _keys.append(key)
+                if key not in _commands_dict:
+                    _commands_dict[key] = {}
+                    _commands_dict = _commands_dict[key]
+                else:
+                    raise ValueError(f"{".".join(_keys)} is already registered")
+            _commands_dict[key] = value
+        nl = name.split(".")
+        _dict_set(nl, command_cls)
+
+
+
 
     @classmethod
     def get(cls, name):
-        return cls._commands.get(name)
+        def _dict_get(keys: List[str], default=None):
+            _key = []
+            _commands_dict = cls._commands
+            for key in keys:
+                if key in _commands_dict:
+                    _commands_dict = _commands_dict[key]
+                else:
+                    return default
+            return _commands_dict
+        return _dict_get(name)
 
 
     @classmethod
@@ -40,22 +59,17 @@ class ToolRegistry:
 
 
 
-# 检查是否已经安装
-import shutil
-def check_installation(package_name):
-    """
-    检查是否已经安装指定软件包
+def register(name: str):
 
-    参数:
-    package_name (str): 要检查的软件包名称
+    def decorator(command_cls):
+        ToolRegistry.register(name, command_cls)
+    
+    return decorator
+    
 
-    返回:
-    bool: 如果软件包已安装，则返回True，否则返回False
-    """
 
-    if shutil.which(package_name):
-        # print("系统已安装 wget")\
-        return True
-    else:
-        # print("系统未安装 wget")
-        return False
+
+
+
+if __name__ == "__main__":
+    ToolRegistry.register("a.b.c.d.e", "wget")
