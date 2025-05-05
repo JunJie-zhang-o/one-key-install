@@ -2,6 +2,45 @@
 
 import platform
 
+from enum import StrEnum
+
+
+class LinuxDistroVersion(StrEnum):
+    # Ubuntu
+    UBUNTU_24_04 = "Ubuntu 24.04"
+    UBUNTU_22_04 = "Ubuntu 22.04"
+    UBUNTU_20_04 = "Ubuntu 20.04"
+
+    # Debian
+    DEBIAN_12 = "Debian 12"
+    DEBIAN_11 = "Debian 11"
+    DEBIAN_10 = "Debian 10"
+
+    # Fedora
+    FEDORA_40 = "Fedora 40"
+    FEDORA_39 = "Fedora 39"
+    FEDORA_38 = "Fedora 38"
+
+    # CentOS (Stream)
+    CENTOS_STREAM_9 = "CentOS Stream 9"
+    CENTOS_STREAM_8 = "CentOS Stream 8"
+
+    # Alpine
+    ALPINE_3_19 = "Alpine 3.19"
+    ALPINE_3_18 = "Alpine 3.18"
+    ALPINE_3_17 = "Alpine 3.17"
+
+    # openSUSE
+    OPENSUSE_LEAP_15_6 = "openSUSE Leap 15.6"
+    OPENSUSE_LEAP_15_5 = "openSUSE Leap 15.5"
+    OPENSUSE_TUMBLEWEED = "openSUSE Tumbleweed"
+
+    # SUSE Linux Enterprise
+    SUSE_15_SP5 = "SUSE 15 SP5"
+    SUSE_15_SP4 = "SUSE 15 SP4"
+
+    # Arch Linux
+    ARCH_ROLLING = "Arch (rolling)"
 
 
 
