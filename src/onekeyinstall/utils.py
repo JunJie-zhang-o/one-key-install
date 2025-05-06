@@ -1,5 +1,6 @@
 
 
+import os
 import platform
 
 from enum import StrEnum
@@ -44,6 +45,13 @@ class LinuxDistroVersion(StrEnum):
 
 
 
+class Arch(StrEnum):
+    X86 = "X86_64"
+    ARM = "aarch64"
+    LOONGARCH = "loongarch64"
+
+
+
 class System:
     """
     Get System Base Info
@@ -51,14 +59,16 @@ class System:
     def __init__(self):
         self.os = platform.system().lower()
         self.arch = platform.machine()
-
+        self.locale = None
         if self.os == "linux":
             self.distribution, self.version = self.__linux_info()
+            self.locale = os.environ.get("LANG", None)
         elif self.os == "windows":
             self.distribution = platform.release()
             self.version = platform.version()
         elif self.os == "darwin":
             self.distribution, self.version = self.__mac_info()
+        
 
 
     def __linux_info(self):
@@ -214,6 +224,30 @@ def check_installation(package_name):
     else:
         return False
 
+
+def get_offline_install_package_suffix():
+    if check_installation("apt"):
+        return ".deb"
+    elif check_installation("pacman"):
+        return ".pkg.tar.zst"
+    elif check_installation("dnf"):
+        return ".rpm"
+    elif check_installation("yum"):
+        return ".rpm"
+    elif check_installation("zypper"):
+        return ".rpm"
+    elif check_installation("apk"):
+        return ".apk"
+
+def get_shell_executor():
+    """
+    获取当前系统的默认shell执行器
+    """
+    shell = os.environ.get("SHELL")
+    if shell:
+        return shell
+    else:
+        return "/bin/bash"
 
 
 if __name__ == '__main__':
