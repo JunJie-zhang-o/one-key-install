@@ -10,6 +10,7 @@
 
 from abc import ABC, abstractmethod
 
+from onekeyinstall.downloader import Downloader
 from onekeyinstall.pm import PMExecutor
 from onekeyinstall.utils import ShellExecutor, System
 
@@ -24,6 +25,7 @@ class Installer(ABC):
         self._executor = executor
         self._system = system
         self.pm_executor = PMExecutor(distribution=self._system.distribution)
+        self.downloader = Downloader(executor=ShellExecutor(False, True, True))
 
 
 
@@ -51,4 +53,7 @@ class Installer(ABC):
     def post_uninstall(self):
         pass
     
+
+    def get_description(self):
+        pass
     
