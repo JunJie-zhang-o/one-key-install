@@ -28,12 +28,14 @@ class Downloader:
             self._curl(url, output_file)
         else:
             self._urllib(url, output_file)
+        return f"{self.DEFAULT_DOWNLOAD_PATH}/{output_file}"
 
 
     def _curl(self, url: str, output_file: str):
         # cmd = ["curl", "-o", f"{self.DEFAULT_DOWNLOAD_PATH}/{output_file}", url, "2>&1"]
         cmd = f"curl -o {self.DEFAULT_DOWNLOAD_PATH}/{output_file} {url} 2>&1"
         self._executor.run(cmd)
+        
 
 
     def _wget(self, url: str, output_file: str):
