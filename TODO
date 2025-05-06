@@ -13,7 +13,7 @@
     ☐ localsend
     ☐ snipaste
     ✔ terminator @done(25-05-06 23:49)
-    ☐ 基础工具集
+    ☐ 基础工具集 git cmake 
     ☐ wechat
     ☐ feishu
     ☐ mujoco
@@ -22,6 +22,7 @@
     ✔ btop htop nvitop @done(25-05-06 23:50)
     SOEM
     IGH
+    ☐ xmake clang clangd
 
 
 对于一些软件可以安装到用户文件夹的目录下

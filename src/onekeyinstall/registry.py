@@ -13,7 +13,6 @@ import functools
 class ToolRegistry:
     _commands = {}
 
-
     @classmethod
     def register(cls, name: str, command_cls):
 
@@ -26,12 +25,10 @@ class ToolRegistry:
                     _commands_dict[key] = {}
                     _commands_dict = _commands_dict[key]
                 else:
-                    raise ValueError(f"{".".join(_keys)} is already registered")
+                    raise ValueError(f"{'.'.join(_keys)} is already registered")
             _commands_dict[key] = value
         nl = name.split(".")
         _dict_set(nl, command_cls)
-
-
 
 
     @classmethod
@@ -60,10 +57,8 @@ class ToolRegistry:
 
 
 def register(name: str):
-
     def decorator(command_cls):
         ToolRegistry.register(name, command_cls)
-    
     return decorator
     
 
