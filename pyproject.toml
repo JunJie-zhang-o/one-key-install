@@ -3,9 +3,9 @@ name = "one-key-install"
 version = "0.1.0"
 description = "Default template for PDM package"
 authors = [
-    {name = "jay.zbox.linux", email = "jay.zbox.linux.com"},
+    {name = "jay.zbox.linux", email = "jay.zhangjunjie@outlook.com"},
 ]
-dependencies = []
+dependencies = ["rich", "fire>=0.7.0", "art>=6.5"]
 requires-python = ">=3.6"
 readme = "README.md"
 license = {text = "MIT"}
@@ -17,3 +17,9 @@ build-backend = "pdm.backend"
 
 [tool.pdm]
 distribution = true
+
+
+[project.scripts]
+# RobopadStartService = "robopad.cli:main"
+# RobopadStartServer = "robopad.server:main"
+OneKeyInstall = "one_key_install:main"

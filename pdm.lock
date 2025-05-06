@@ -5,7 +5,118 @@
 groups = ["default"]
 strategy = ["inherit_metadata"]
 lock_version = "4.5.0"
-content_hash = "sha256:0b1553d2c728a62b86879591ca671afe4615e14fb9efc14894637ac8cb177fae"
+content_hash = "sha256:7fe4c175d3d00a919f424fe6926f340a3c4bbb7deafd43264057f48801d12666"
 
 [[metadata.targets]]
-requires_python = ">=3.12"
+requires_python = ">=3.6"
+
+[[package]]
+name = "art"
+version = "6.5"
+requires_python = ">=3.6"
+summary = "ASCII Art Library For Python"
+groups = ["default"]
+files = [
+    {file = "art-6.5-py3-none-any.whl", hash = "sha256:70706408144c45c666caab690627d5c74aea7b6c7ce8cc968408ddeef8d84afd"},
+    {file = "art-6.5.tar.gz", hash = "sha256:a98d77b42c278697ec6cf4b5bdcdfd997f6b2425332da078d4e31e31377d1844"},
+]
+
+[[package]]
+name = "colorama"
+version = "0.4.5"
+requires_python = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, !=3.4.*"
+summary = "Cross-platform colored terminal text."
+groups = ["default"]
+files = [
+    {file = "colorama-0.4.5-py2.py3-none-any.whl", hash = "sha256:854bf444933e37f5824ae7bfc1e98d5bce2ebe4160d46b5edf346a89358e99da"},
+    {file = "colorama-0.4.5.tar.gz", hash = "sha256:e6c6b4334fc50988a639d9b98aa429a0b57da6e17b9a44f0451f930b6967b7a4"},
+]
+
+[[package]]
+name = "commonmark"
+version = "0.9.1"
+summary = "Python parser for the CommonMark Markdown spec"
+groups = ["default"]
+dependencies = [
+    "future>=0.14.0; python_version < \"3\"",
+]
+files = [
+    {file = "commonmark-0.9.1-py2.py3-none-any.whl", hash = "sha256:da2f38c92590f83de410ba1a3cbceafbc74fee9def35f9251ba9a971d6d66fd9"},
+    {file = "commonmark-0.9.1.tar.gz", hash = "sha256:452f9dc859be7f06631ddcb328b6919c67984aca654e5fefb3914d54691aed60"},
+]
+
+[[package]]
+name = "dataclasses"
+version = "0.8"
+requires_python = ">=3.6, <3.7"
+summary = "A backport of the dataclasses module for Python 3.6"
+groups = ["default"]
+marker = "python_version >= \"3.6\" and python_version < \"3.7\""
+files = [
+    {file = "dataclasses-0.8-py3-none-any.whl", hash = "sha256:0201d89fa866f68c8ebd9d08ee6ff50c0b255f8ec63a71c16fda7af82bb887bf"},
+    {file = "dataclasses-0.8.tar.gz", hash = "sha256:8479067f342acf957dc82ec415d355ab5edb7e7646b90dc6e2fd1d96ad084c97"},
+]
+
+[[package]]
+name = "fire"
+version = "0.7.0"
+summary = "A library for automatically generating command line interfaces."
+groups = ["default"]
+dependencies = [
+    "termcolor",
+]
+files = [
+    {file = "fire-0.7.0.tar.gz", hash = "sha256:961550f07936eaf65ad1dc8360f2b2bf8408fad46abbfa4d2a3794f8d2a95cdf"},
+]
+
+[[package]]
+name = "pygments"
+version = "2.14.0"
+requires_python = ">=3.6"
+summary = "Pygments is a syntax highlighting package written in Python."
+groups = ["default"]
+files = [
+    {file = "Pygments-2.14.0-py3-none-any.whl", hash = "sha256:fa7bd7bd2771287c0de303af8bfdfc731f51bd2c6a47ab69d117138893b82717"},
+    {file = "Pygments-2.14.0.tar.gz", hash = "sha256:b3ed06a9e8ac9a9aae5a6f5dbe78a8a58655d17b43b93c078f094ddc476ae297"},
+]
+
+[[package]]
+name = "rich"
+version = "10.11.0"
+requires_python = ">=3.6,<4.0"
+summary = "Render rich text, tables, progress bars, syntax highlighting, markdown and more to the terminal"
+groups = ["default"]
+dependencies = [
+    "colorama<0.5.0,>=0.4.0",
+    "commonmark<0.10.0,>=0.9.0",
+    "dataclasses<0.9,>=0.7; python_version >= \"3.6\" and python_version < \"3.7\"",
+    "pygments<3.0.0,>=2.6.0",
+    "typing-extensions<4.0.0,>=3.7.4; python_version < \"3.8\"",
+]
+files = [
+    {file = "rich-10.11.0-py3-none-any.whl", hash = "sha256:44bb3f9553d00b3c8938abf89828df870322b9ba43caf3b12bb7758debdc6dec"},
+    {file = "rich-10.11.0.tar.gz", hash = "sha256:016fa105f34b69c434e7f908bb5bd7fefa9616efdb218a2917117683a6394ce5"},
+]
+
+[[package]]
+name = "termcolor"
+version = "1.1.0"
+summary = "ANSII Color formatting for output in terminal."
+groups = ["default"]
+files = [
+    {file = "termcolor-1.1.0.tar.gz", hash = "sha256:1d6d69ce66211143803fbc56652b41d73b4a400a2891d7bf7a1cdf4c02de613b"},
+]
+
+[[package]]
+name = "typing-extensions"
+version = "3.10.0.2"
+summary = "Backported and Experimental Type Hints for Python 3.5+"
+groups = ["default"]
+marker = "python_version < \"3.8\""
+dependencies = [
+    "typing>=3.7.4; python_version < \"3.5\"",
+]
+files = [
+    {file = "typing_extensions-3.10.0.2-py3-none-any.whl", hash = "sha256:f1d25edafde516b146ecd0613dabcc61409817af4766fbbcfb8d1ad4ec441a34"},
+    {file = "typing_extensions-3.10.0.2.tar.gz", hash = "sha256:49f75d16ff11f1cd258e1b988ccff82a3ca5570217d7ad8c5f48205dd99a677e"},
+]
