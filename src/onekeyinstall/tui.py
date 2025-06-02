@@ -19,19 +19,12 @@ class OKIHeader(Header):
 
     
     def compose(self):
-        # return super().compose()
         yield HeaderTitle()
 
-    async def on_mouse_down(self, event: events.MouseDown) -> None:
-        # 阻止点击头部时触发的默认行为
-        event.stop()  # 这将阻止事件进一步传播
 
-    def _on_click(self):
-        # self.toggle_class("-tall")
-        pass
+    def _on_click(self, e):
+        e.prevent_default() # 拒绝调用父类的事件处理
 
-    def on_click(self):
-        pass
 
 
 class OKIProgressBar(Widget):
