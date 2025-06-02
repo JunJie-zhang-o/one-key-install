@@ -20,4 +20,5 @@
         "--line-length", "120",   // 设置每行的最大字符数
         "--fast"  // 加速模式，忽略复杂的格式化
     ],
+    "python.formatting.provider": "black",
 }

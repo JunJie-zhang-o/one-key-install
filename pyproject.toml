@@ -5,8 +5,8 @@ description = "Default template for PDM package"
 authors = [
     {name = "jay.zbox.linux", email = "jay.zhangjunjie@outlook.com"},
 ]
-dependencies = ["rich", "fire>=0.7.0", "art>=6.5"]
-requires-python = ">=3.6"
+dependencies = ["rich", "fire>=0.7.0", "art>=6.5", "prompt-toolkit>=3.0.3", "textual>=0.73.0"]
+requires-python = ">=3.8"
 readme = "README.md"
 license = {text = "MIT"}
 
