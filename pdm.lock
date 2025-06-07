@@ -5,7 +5,7 @@
 groups = ["default"]
 strategy = ["inherit_metadata"]
 lock_version = "4.5.0"
-content_hash = "sha256:faf55f6d268b84cdc5d48712a7563d49c09236f9bf59b68cec23d0171887ecc7"
+content_hash = "sha256:c899f19ec18f6ece9df11c940589cd647cafd80427fa95d9e3225c9754f3077b"
 
 [[metadata.targets]]
 requires_python = ">=3.8"
@@ -126,6 +126,16 @@ groups = ["default"]
 files = [
     {file = "Pygments-2.14.0-py3-none-any.whl", hash = "sha256:fa7bd7bd2771287c0de303af8bfdfc731f51bd2c6a47ab69d117138893b82717"},
     {file = "Pygments-2.14.0.tar.gz", hash = "sha256:b3ed06a9e8ac9a9aae5a6f5dbe78a8a58655d17b43b93c078f094ddc476ae297"},
+]
+
+[[package]]
+name = "python-i18n"
+version = "0.3.9"
+summary = "Translation library for Python"
+groups = ["default"]
+files = [
+    {file = "python-i18n-0.3.9.tar.gz", hash = "sha256:df97f3d2364bf3a7ebfbd6cbefe8e45483468e52a9e30b909c6078f5f471e4e8"},
+    {file = "python_i18n-0.3.9-py3-none-any.whl", hash = "sha256:bda5b8d889ebd51973e22e53746417bd32783c9bd6780fd27cadbb733915651d"},
 ]
 
 [[package]]
