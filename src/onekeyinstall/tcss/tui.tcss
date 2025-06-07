@@ -44,3 +44,6 @@ ProgressBar{
     grid-size:3;
     grid-columns:80% 6% 14%
 }
+OKIListItem{
+    height: 1;
+}

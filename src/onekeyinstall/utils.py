@@ -3,10 +3,10 @@
 import os
 import platform
 
-from enum import StrEnum
+from enum import Enum
+from typing import Union
 
-
-class LinuxDistroVersion(StrEnum):
+class LinuxDistroVersion(Enum):
     # Ubuntu
     UBUNTU_24_04 = "Ubuntu 24.04"
     UBUNTU_22_04 = "Ubuntu 22.04"
@@ -45,7 +45,7 @@ class LinuxDistroVersion(StrEnum):
 
 
 
-class Arch(StrEnum):
+class Arch(Enum):
     X86 = "X86_64"
     ARM = "aarch64"
     LOONGARCH = "loongarch64"
@@ -202,13 +202,6 @@ class ShellExecutor:
         except subprocess.CalledProcessError as e:
             print(f"命令执行失败: {e}")
             return e
-
-
-
-# 环境变量
-
-
-# 配置文件
 
 
 

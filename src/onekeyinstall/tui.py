@@ -55,11 +55,15 @@ class OKIProgressBar(Widget):
 
 class OKIListItem(Widget):
 
-    def __init__(self) -> None:
-        super().__init__()
+    def __init__(self, index, name) -> None:
+        super().__init__(id="oki-listitem")
+        self._show_index = index
+        self._show_name = name
 
     def compose(self):
-        return super().compose()
+        with Horizontal():
+            yield Label(self._show_index)
+            yield Label(self._show_name)
 
 
 class OKIListView(Widget):
@@ -74,14 +78,12 @@ class OKIListView(Widget):
         self.list_view = ListView(
             ListItem(
                 Horizontal(
-                    Label("🍎 Apple", classes="name"),
-                    Label("Price: $1", classes="price"),
+                    OKIListItem(index="🍎 Apple", name="Price: $1")
                 )
             ),
             ListItem(
                 Horizontal(
-                    Label("🍌 Banana", classes="name"),
-                    Label("Price: $0.5", classes="price"),
+                    OKIListItem(index="🍌 Banana", name="Price: $0.5")
                 )
             ),
         )
@@ -148,7 +150,7 @@ class OKIStatusBar(Widget):
     def compose(self):
         # 动态显示时间
         # 显示什么系统和版本，什么架构
-        #
+        # 当前的用户，当前的shell
         yield Label("this is Label")
         yield Static("This is Static Text")
 
@@ -169,8 +171,8 @@ class OKITui(App):
         Binding("s", "select_down", "向下", show=True, priority=True),
     ]
 
-    TITLE = "One Key Install App"
-    SUB_TITLE = "一件安装"
+    TITLE = "Ooone Key Install App"
+    SUB_TITLE = "一键安装"
 
     def __init__(self):
         # super().__init__(driver_class, css_path, watch_css)
