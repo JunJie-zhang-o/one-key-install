@@ -33,5 +33,5 @@ class InstallWeichat(Installer):
         self.offline_package = self.downloader.download(url, f"WeChatLinux.{_suffix}")
 
 
-    def install(self):
+    def register_install(self):
         self.pm_executor.install(self.offline_package)

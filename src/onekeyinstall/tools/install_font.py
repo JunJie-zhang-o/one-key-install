@@ -12,11 +12,11 @@ class InstallFiraCodeNerdFont(Installer):
     
     PACKAGE_NAME = "fonts-firacode"
 
-    def install(self):        
+    def register_install(self):        
         self.pm_executor.install(self.PACKAGE_NAME)
 
     
-    def uninstall(self):
+    def register_uninstall(self):
         self.pm_executor.remove(self.PACKAGE_NAME)
 
 

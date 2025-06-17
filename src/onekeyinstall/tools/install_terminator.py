@@ -7,6 +7,10 @@ from onekeyinstall.registry import register
 
 
 
+
+
+
+
 @register("terminal.terminator")
 class InstallTerminator(Installer):
     

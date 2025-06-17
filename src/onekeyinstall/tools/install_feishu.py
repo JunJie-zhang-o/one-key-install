@@ -21,6 +21,6 @@ class InstallFeishu(Installer):
 
 
 
-    def install(self):
-        return super().install()
+    def register_install(self):
+        return super().register_install()
 

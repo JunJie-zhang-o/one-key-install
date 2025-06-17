@@ -24,7 +24,7 @@ class InstallNvitop(Installer):
 
     PACKAGE_NAME = "nvitop"
 
-    def install(self):
+    def register_install(self):
         # return super().install()
         self._executor.run(f"pip3 install {self.PACKAGE_NAME} -i https://pypi.tuna.tsinghua.edu.cn/simple")
 
