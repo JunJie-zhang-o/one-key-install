@@ -1,14 +1,23 @@
-from time import monotonic
+import getpass
+import sys
 import time
-from textual.app import App, ComposeResult, Widget
-from textual.widgets import Footer, Header, Static, ProgressBar, Label, ListView, ListItem
-from textual.widgets._header import HeaderTitle
-from textual.containers import Center, Vertical, Horizontal
-from textual import events
-from textual.widgets import RichLog
-from textual.reactive import reactive
-from textual.binding import Binding
 from pathlib import Path
+from time import monotonic
+
+from textual import events, on
+from textual.app import App, ComposeResult, Widget
+from textual.binding import Binding
+from textual.containers import Center, Grid, Horizontal, Vertical
+from textual.reactive import reactive
+from textual.screen import Screen
+from textual.widgets import (Button, Footer, Header, Label, ListItem, ListView,
+                             MarkdownViewer, ProgressBar, RichLog, Rule,
+                             Static)
+from textual.widgets._header import HeaderTitle
+
+from onekeyinstall import _version
+from onekeyinstall.registry import ToolRegistry
+from onekeyinstall.utils import System, get_shell_executor
 
 
 class OKIHeader(Header):
@@ -53,46 +62,99 @@ class OKIProgressBar(Widget):
         self._progress_bar.update(progress=progress_rate)
 
 
-class OKIListItem(Widget):
+class OKIListItem(ListItem):
 
     def __init__(self, index, name) -> None:
-        super().__init__(id="oki-listitem")
+        # super().__init__(id="oki-listitem")
+        super().__init__()
         self._show_index = index
         self._show_name = name
 
     def compose(self):
         with Horizontal():
-            yield Label(self._show_index)
+            yield Label(" ")
+            yield Label(str(self._show_index))
+            yield Label(" ")
             yield Label(self._show_name)
 
 
 class OKIListView(Widget):
+    
+
+    current_selected = reactive("")
+
     def __init__(self) -> None:
         super().__init__(id="oki-listview")
         self.styles.border = ("round", "#6c6c4f")
         self.border_title = "Optional Installation Items"
         self.styles.border_title_align = "center"
-        # self.border_subtitle = "4456" # note 用来显示当前的层级
+        self.border_subtitle = "4456" # note 用来显示当前的层级
+
+        self._registry = ToolRegistry()._commands
+        self._selected = ""
+
 
     def compose(self):
-        self.list_view = ListView(
-            ListItem(
-                Horizontal(
-                    OKIListItem(index="🍎 Apple", name="Price: $1")
-                )
-            ),
-            ListItem(
-                Horizontal(
-                    OKIListItem(index="🍌 Banana", name="Price: $0.5")
-                )
-            ),
-        )
+        self.list_view = ListView()
         with Vertical(id="vertical_listview"):
             yield self.list_view
-            # yield Label("Item A")
+
+
+    async def on_mount(self) -> None:
+        await self.update_items(items=ToolRegistry.list())
+
+
+    async def update_items(self, items=ToolRegistry.list()):
+        self.list_view.clear()
+        for index, value in enumerate(items):
+            item = OKIListItem(index=index, name=value)
+            await self.list_view.append(item)
+        # 取消默认选中项
+        self.list_view.index = None
+
+
+    @on(ListView.Highlighted)
+    def handle_index(self):
+        # self.app.query_one(RichLog).write(str(self.list_view.index))
+        if self.list_view.highlighted_child:
+            self.current_selected = self.list_view.highlighted_child._show_name
+
+
+    def watch_current_selected(self, current_selected: str) -> None:
+        if self._selected != "":
+            self.border_subtitle = f"{self._selected}.{current_selected}"  
+        else:
+            self.border_subtitle = f"{current_selected}"  
+            
+
+    async def on_key(self, event):
+        # TODO 实际的逻辑应该OKI中去,不建议在这里进行处理
+        
+        if event.key in ["right", "d"]:
+            if self.current_selected not in self._selected:
+                self._selected += self.current_selected
+                next_items = ToolRegistry.get(self._selected)
+                await self.update_items(next_items)
+        elif event.key in ["left", "a"]:
+            self.current_selected = ""
+            if self._selected.find(".") == -1:
+                self._selected = ""
+                await self.update_items(items=ToolRegistry.list())
+            else:
+                self._selected = self._selected[:self._selected.find(".", -1)]
+                next_items = ToolRegistry.get(self._selected)
+                await self.update_items(next_items)
+        
+        elif event.key == "enter":
+            
+
+        
 
 
 class OKIRichLog(Widget):
+    
+    DEFAULT_OKI_DESC_FILE_PATH = Path(__file__).parent.joinpath("res", "oki.md")
+
     def __init__(self) -> None:
         super().__init__(id="oki-richlog")
         self.can_focus = False
@@ -103,16 +165,16 @@ class OKIRichLog(Widget):
 
     def compose(self):
         
-        self._text = Static("123123")
+        self._text = MarkdownViewer(Path(self.DEFAULT_OKI_DESC_FILE_PATH).read_text(), show_table_of_contents=False)
         self._rich_log = RichLog(id="log")
         self._rich_log.can_focus = False
         self._rich_log.styles.height = "1fr"
         self._rich_log.styles.overflow_y = "auto"
         self._progress_bar = OKIProgressBar()
-        # self._progress_bar = ProgressBar()
         self._progress_bar.styles.height = "auto"
         with Vertical(id="vertical_log"):
             yield self._text
+            yield Rule()
             yield self._rich_log
             yield self._progress_bar
             # yield Label("Item 1")
@@ -125,6 +187,7 @@ class OKIRichLog(Widget):
         self._text.render_str(text)
 
 class OKIStatusBar(Widget):
+
 
     system_t = reactive(monotonic)
 
@@ -140,6 +203,8 @@ class OKIStatusBar(Widget):
         self.timer = self.set_interval(1 / 60, self.update_sys_t, pause=False)
         # self.timer.resume()
 
+        self._system = System()
+
     def update_sys_t(self):
         self.system_t = monotonic()  # 更新该响应式数据时，会自动调用以watch开头的方法如 watch_system_t
         self.border_subtitle = f"{time.strftime('%Y-%m-%d %H:%M:%S', time.localtime())}"
@@ -148,47 +213,78 @@ class OKIStatusBar(Widget):
         pass
 
     def compose(self):
-        # 动态显示时间
-        # 显示什么系统和版本，什么架构
-        # 当前的用户，当前的shell
-        yield Label("this is Label")
-        yield Static("This is Static Text")
+        # yield Label("this is Label")
+        # yield Static("This is Static Text")
+        yield Static(f"🖥️ OS:{self._system.os}")
+        yield Static(f"🧬 Arch:{self._system.arch}")
+        yield Static(f"🌍 Locale:{self._system.locale}")
+        yield Static(f"📦 Distribution:{self._system.distribution}")
+        yield Static(f"🧾 SysVersion:{self._system.version}")
+        yield Static(f"💻 Shell:{get_shell_executor()}")
+        yield Static(f"🛠️ SWVersion:{_version}")
+        yield Static(f"🐍 Python:{sys.version}")
+        yield Static(f"👤 User:{getpass.getuser()}")
+        # yield Static(f"🧾 PythonExec:{sys.executable}")
+
+
+
+
+class TipsScreen(Screen):
+    """Screen with a dialog to quit."""
+
+
+    def __init__(self, tips: str = "", btn1_str: str = "Ensure", btn2_str: str = "Cancel"):
+        super().__init__()
+        self.tips, self.btn1_str, self.btn2_str = tips, btn1_str, btn2_str
+
+
+    def compose(self) -> ComposeResult:
+        yield Grid(
+            Label(self.tips, id="question"),
+            Button(self.btn1_str, variant="error", id="btn1"),
+            Button(self.btn2_str, variant="primary", id="btn2"),
+            id="dialog",
+        )
+
+    def on_button_pressed(self, event: Button.Pressed) -> None:
+        if event.button.id == "btn1":
+            self.app.exit()
+        else:
+            self.app.pop_screen()
 
 
 class OKITui(App):
 
-    # CSS_PATH = "/home/jay/00-CodeSpace/00-MySelf/03-one-key-install/src/onekeyinstall/tcss/tui.tcss"
     CSS_PATH = Path(__file__).parent.joinpath("tcss", "tui.tcss")
 
     BINDINGS = [
-        Binding("up", "quit4", "退出4", show=True, priority=True),      # note:设置priority 优先显示再footer中,并且顺序按照先其他按钮再字母按钮
-        Binding("down", "quit2", "退出2", show=True, priority=True),
-        Binding("left", "quit1", "退出1", show=True, priority=True),
-        Binding("right", "quit3", "退出3", show=True, priority=True),
-        Binding("enter", "select_enter", "选择", show=True, priority=True),
-        Binding("w", "select_up", "向上", show=True, priority=True),
-        Binding("q", "quit", "退出", show=True, priority=True),
-        Binding("s", "select_down", "向下", show=True, priority=True),
+        Binding("up",    "select_up",     "Up",           show=True, priority=True),      # note:设置priority 优先显示再footer中,并且顺序按照先其他按钮再字母按钮
+        Binding("w",     "select_up1",    "Up",           show=True, priority=True),
+        Binding("down",  "select_down",   "Down",         show=True, priority=True),
+        Binding("s",     "select_down1",  "Down",         show=True, priority=True),
+        Binding("left",  "select_left",   "Parent level", show=True, priority=True),
+        Binding("a",     "select_left1",  "Parent level", show=True, priority=True),
+        Binding("right", "select_right",  "Child level",  show=True, priority=True),
+        Binding("d",     "select_right1", "Child level",  show=True, priority=True),
+        Binding("enter", "select_enter",  "Ensure",       show=True, priority=True),
+        Binding("q",     "quit",          "Quit",         show=True, priority=True),
     ]
 
     TITLE = "Ooone Key Install App"
     SUB_TITLE = "一键安装"
 
     def __init__(self):
-        # super().__init__(driver_class, css_path, watch_css)
         super().__init__()
         # self.container_up = OKIStatusBar()    # 在这里进行实例化的话，会因为没有事件循环导致报错
         self.container_left = OKIListView()
         self.container_right = OKIRichLog()
 
     def compose(self) -> ComposeResult:
-        # yield Header(icon="")
         yield OKIHeader()
         with Vertical(id="app-vertical"):
             yield OKIStatusBar()  # ? 如果进行实例化后
             with Horizontal(id="app-horizontal"):
                 yield self.container_left
-                # yield OKIListView()
                 yield self.container_right
         yield Footer()
 
@@ -211,16 +307,17 @@ class OKITui(App):
         self.query_one(RichLog).write(self.app_focus)
         self.query_one(RichLog).write(event)
         if event.key in ["w", "up"]:
-            self.container_left.list_view.action_cursor_up()
+            pass
         elif event.key in ["s", "down"]:
-            self.container_left.list_view.action_cursor_down()
+            pass
         elif event.key == "enter":
-            self.container_left.list_view.action_select_cursor()
+            pass
         elif event.key == "c":
             self.query_one(RichLog).write("")
             self.query_one(RichLog).clear()
         elif event.key == "u":
             self.query_one(ProgressBar).advance()
+
 
 if __name__ == "__main__":
     app = OKITui()

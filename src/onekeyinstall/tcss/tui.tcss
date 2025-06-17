@@ -47,3 +47,9 @@ ProgressBar{
 OKIListItem{
     height: 1;
 }
+
+
+OKIStatusBar{
+    layout: grid;
+    grid-size: 3;   
+}
