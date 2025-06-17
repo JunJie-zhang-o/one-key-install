@@ -3,7 +3,7 @@ from io import TextIOWrapper
 from pathlib import Path
 import platform
 from typing import Dict, Literal, Union
-
+import os
 
 class Shell(ABC):
 
@@ -78,23 +78,36 @@ class EnvHelper:
         "zsh": ShellZsh,
         "fish": ShellFish,
     }
+    OS = platform.platform().lower()
 
     def __init__(self, shell_type: Literal["bash", "zsh", "fish"]):
         self._shell = self.SHELLS.get(shell_type, None)
-        self._os = platform.platform().lower()
-
+        if self._shell is None:
+            print("The Shell Is InValid")
+            quit()
         self._file_helper = FileHelper(file_path=self.DEFAULT_CUSTOM_ENV_FILE)
 
 
     def append_env(self, name, value):
 
-        if self._os in ["linux", "darwin"]:
+        if self.OS in ["linux", "darwin"]:
             with self._file_helper as f:
                 f.write(f"{self._shell.append_env(name, value)}\n")
-        elif self._os == "windows":
+        elif self.OS == "windows":
             # TODO how to append env in win sys
             pass
 
+    @classmethod
+    def get_default_shell(cls) -> Union[str, None]:
+        if cls.OS in ["linux", "darwin"]:
+            _SHELL = os.environ.get("SHELL")
+            if "zsh" in _SHELL:
+                return "zsh"
+            elif "bash" in _SHELL:
+                return "bash"
+            elif "fish" in _SHELL:
+                return "fish"
+        return None
 
 
 # 配置文件
