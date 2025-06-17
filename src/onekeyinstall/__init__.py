@@ -10,6 +10,8 @@ load_modules(Path(__file__).parent.joinpath("tools"), __package__)
 
 
 
+_version = "0.0.1"
+
 
 import fire
 

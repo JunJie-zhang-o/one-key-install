@@ -1,5 +1,5 @@
 
-
+# deprerate 与键盘和鼠标交互不方便,暂时不用
 from datetime import datetime
 from rich import print
 from rich.layout import Layout

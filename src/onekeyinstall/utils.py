@@ -6,7 +6,7 @@ import platform
 from enum import Enum
 from typing import Union
 
-class LinuxDistroVersion(Enum):
+class LinuxDistroVersion(str, Enum):
     # Ubuntu
     UBUNTU_24_04 = "Ubuntu 24.04"
     UBUNTU_22_04 = "Ubuntu 22.04"
@@ -45,7 +45,10 @@ class LinuxDistroVersion(Enum):
 
 
 
-class Arch(Enum):
+
+
+
+class Arch(str, Enum):
     X86 = "X86_64"
     ARM = "aarch64"
     LOONGARCH = "loongarch64"
