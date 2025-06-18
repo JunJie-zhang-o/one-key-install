@@ -70,6 +70,7 @@ class SupportSysVersion(str, Enum):
 def register(name: str, ):
     def decorator(command_cls):
         ToolRegistry.register(name, command_cls)
+        return command_cls
     return decorator
 
 
