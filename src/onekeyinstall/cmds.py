@@ -48,3 +48,4 @@ class Pipeline:
         # for tip,
         # note 应该在实际的执行侧进行执行,或者需要将当前的command name 传出去,以用来显示
         pass
+

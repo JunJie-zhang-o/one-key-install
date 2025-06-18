@@ -78,7 +78,7 @@ class EnvHelper:
         "zsh": ShellZsh,
         "fish": ShellFish,
     }
-    OS = platform.platform().lower()
+    OS = platform.system().lower()
 
     def __init__(self, shell_type: Literal["bash", "zsh", "fish"]):
         self._shell = self.SHELLS.get(shell_type, None)

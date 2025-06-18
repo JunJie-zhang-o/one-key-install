@@ -8,14 +8,16 @@ from textual import events, on
 from textual.app import App, ComposeResult, Widget
 from textual.binding import Binding
 from textual.containers import Center, Grid, Horizontal, Vertical
+from textual.message import Message
 from textual.reactive import reactive
-from textual.screen import Screen
+from textual.screen import ModalScreen, Screen
 from textual.widgets import (Button, Footer, Header, Label, ListItem, ListView,
                              MarkdownViewer, ProgressBar, RichLog, Rule,
                              Static)
 from textual.widgets._header import HeaderTitle
 
 from onekeyinstall import _version
+from onekeyinstall.installer import Installer
 from onekeyinstall.registry import ToolRegistry
 from onekeyinstall.utils import System, get_shell_executor
 
@@ -65,7 +67,6 @@ class OKIProgressBar(Widget):
 class OKIListItem(ListItem):
 
     def __init__(self, index, name) -> None:
-        # super().__init__(id="oki-listitem")
         super().__init__()
         self._show_index = index
         self._show_name = name
@@ -81,6 +82,14 @@ class OKIListItem(ListItem):
 class OKIListView(Widget):
     
 
+    class Selected(Message):
+        
+
+        def __init__(self, installer:Installer):
+            self._installer = installer
+            super().__init__()
+
+
     current_selected = reactive("")
 
     def __init__(self) -> None:
@@ -88,7 +97,6 @@ class OKIListView(Widget):
         self.styles.border = ("round", "#6c6c4f")
         self.border_title = "Optional Installation Items"
         self.styles.border_title_align = "center"
-        self.border_subtitle = "4456" # note 用来显示当前的层级
 
         self._registry = ToolRegistry()._commands
         self._selected = ""
@@ -129,24 +137,31 @@ class OKIListView(Widget):
 
     async def on_key(self, event):
         # TODO 实际的逻辑应该OKI中去,不建议在这里进行处理
-        
         if event.key in ["right", "d"]:
             if self.current_selected not in self._selected:
                 self._selected += self.current_selected
                 next_items = ToolRegistry.get(self._selected)
-                await self.update_items(next_items)
+                if type(next_items) is dict:
+                    await self.update_items(next_items)
         elif event.key in ["left", "a"]:
-            self.current_selected = ""
             if self._selected.find(".") == -1:
                 self._selected = ""
-                await self.update_items(items=ToolRegistry.list())
+                items = ToolRegistry.list()
             else:
-                self._selected = self._selected[:self._selected.find(".", -1)]
-                next_items = ToolRegistry.get(self._selected)
-                await self.update_items(next_items)
+                self._selected = self._selected[:self._selected.find(".", -1)-1]
+                items = ToolRegistry.get(self._selected)
+            self.current_selected = ""
+            await self.update_items(items)
         
         elif event.key == "enter":
             
+            _cls = ToolRegistry.get(f"{self._selected}.{self.current_selected}")
+            def check_tip_screen_ret(ret):
+                if ret:
+                    # 启动安装
+                    self.post_message(self.Selected(_cls))
+            if _cls:
+                self.app.push_screen(OKITipsScreen("123"), check_tip_screen_ret)
 
         
 
@@ -172,9 +187,11 @@ class OKIRichLog(Widget):
         self._rich_log.styles.overflow_y = "auto"
         self._progress_bar = OKIProgressBar()
         self._progress_bar.styles.height = "auto"
+        self._title = Label()
         with Vertical(id="vertical_log"):
             yield self._text
             yield Rule()
+            yield self._title
             yield self._rich_log
             yield self._progress_bar
             # yield Label("Item 1")
@@ -183,8 +200,24 @@ class OKIRichLog(Widget):
     # 需要呼出交互
     # 确认交互内容
 
-    def set_text(self, text: str):
+    def set_description(self, text: str):
         self._text.render_str(text)
+
+    
+    def set_installer_name(self, name: str):
+        self.border_subtitle = f"Install {name}"
+
+    
+    def set_title(self, title: str):
+        self._title.update(title)
+
+
+    def add_log(self, log: str):
+        self._rich_log.write(log)
+
+    
+    def clear_log(self):
+        self._rich_log.clear()
 
 class OKIStatusBar(Widget):
 
@@ -195,10 +228,8 @@ class OKIStatusBar(Widget):
         super().__init__(id="oki-status-bar")
         self.styles.border = ("round", "#5a6c5b")
         self.can_focus = False
-        # self.border_title = f"{self.system_t}"
         self.border_title = f"System Status"
         self.styles.border_title_align = "center"
-        # self.border_subtitle = "4456"
         # create timer
         self.timer = self.set_interval(1 / 60, self.update_sys_t, pause=False)
         # self.timer.resume()
@@ -213,29 +244,28 @@ class OKIStatusBar(Widget):
         pass
 
     def compose(self):
-        # yield Label("this is Label")
-        # yield Static("This is Static Text")
         yield Static(f"🖥️ OS:{self._system.os}")
         yield Static(f"🧬 Arch:{self._system.arch}")
         yield Static(f"🌍 Locale:{self._system.locale}")
         yield Static(f"📦 Distribution:{self._system.distribution}")
         yield Static(f"🧾 SysVersion:{self._system.version}")
         yield Static(f"💻 Shell:{get_shell_executor()}")
-        yield Static(f"🛠️ SWVersion:{_version}")
+        yield Static(f"🛠️  SWVersion:{_version}")
         yield Static(f"🐍 Python:{sys.version}")
         yield Static(f"👤 User:{getpass.getuser()}")
-        # yield Static(f"🧾 PythonExec:{sys.executable}")
 
 
 
 
-class TipsScreen(Screen):
+# class OKITipsScreen(Screen):
+class OKITipsScreen(ModalScreen[bool]):
     """Screen with a dialog to quit."""
 
 
     def __init__(self, tips: str = "", btn1_str: str = "Ensure", btn2_str: str = "Cancel"):
         super().__init__()
         self.tips, self.btn1_str, self.btn2_str = tips, btn1_str, btn2_str
+        self.selected_button = 0  # 默认选择第一个按钮
 
 
     def compose(self) -> ComposeResult:
@@ -243,30 +273,55 @@ class TipsScreen(Screen):
             Label(self.tips, id="question"),
             Button(self.btn1_str, variant="error", id="btn1"),
             Button(self.btn2_str, variant="primary", id="btn2"),
-            id="dialog",
+            id="tips-dialog",
         )
 
-    def on_button_pressed(self, event: Button.Pressed) -> None:
-        if event.button.id == "btn1":
-            self.app.exit()
+    def on_mount(self, event):
+        self.query_one("#btn1").focus()
+        self.query_one("#btn2").remove_class("focused")
+
+    def on_key(self, event: events.Key) -> None:
+        """Handle keyboard events for button selection."""
+        if event.key == "left":
+            self.selected_button = 0
+            self.update_button_selection()
+        elif event.key == "right":
+            self.selected_button = 1
+            self.update_button_selection()
+        elif event.key == "enter":
+            if self.selected_button == 0:
+                self.dismiss(True)          # dismiss will auto close TipsScreen
+            elif self.selected_button == 1:
+                self.dismiss(False)
+
+    def update_button_selection(self):
+        """Update button styles based on selected button."""
+        btn1 = self.query_one("#btn1")
+        btn2 = self.query_one("#btn2")
+
+        if self.selected_button == 0:
+            btn1.focus()
+            btn2.remove_class("focused")
         else:
-            self.app.pop_screen()
+            btn2.focus()
+            btn1.remove_class("focused")
 
 
 class OKITui(App):
 
     CSS_PATH = Path(__file__).parent.joinpath("tcss", "tui.tcss")
 
+    # 这个顺序最好是按照上下左右顺序+字母键的顺序，主要是和footer的显示有关系
     BINDINGS = [
-        Binding("up",    "select_up",     "Up",           show=True, priority=True),      # note:设置priority 优先显示再footer中,并且顺序按照先其他按钮再字母按钮
-        Binding("w",     "select_up1",    "Up",           show=True, priority=True),
-        Binding("down",  "select_down",   "Down",         show=True, priority=True),
-        Binding("s",     "select_down1",  "Down",         show=True, priority=True),
-        Binding("left",  "select_left",   "Parent level", show=True, priority=True),
-        Binding("a",     "select_left1",  "Parent level", show=True, priority=True),
-        Binding("right", "select_right",  "Child level",  show=True, priority=True),
-        Binding("d",     "select_right1", "Child level",  show=True, priority=True),
+        # Binding("up",    "select_up",     "Up",           show=True, priority=True),      # note:设置priority 优先显示再footer中,并且顺序按照先其他按钮再字母按钮
         Binding("enter", "select_enter",  "Ensure",       show=True, priority=True),
+        Binding("w",     "select_up1",    "Up",           show=True, priority=True),
+        # Binding("down",  "select_down",   "Down",         show=True, priority=True),
+        Binding("a",     "select_left1",  "Parent level", show=True, priority=True),
+        Binding("s",     "select_down1",  "Down",         show=True, priority=True),
+        # Binding("left",  "select_left",   "Parent level", show=True, priority=True),
+        # Binding("right", "select_right",  "Child level",  show=True, priority=True),
+        Binding("d",     "select_right1", "Child level",  show=True, priority=True),
         Binding("q",     "quit",          "Quit",         show=True, priority=True),
     ]
 
@@ -304,8 +359,8 @@ class OKITui(App):
     def on_key(self, event: events.Key) -> None:
         # 键盘事件响应
         # print(self.app_focus)
-        self.query_one(RichLog).write(self.app_focus)
-        self.query_one(RichLog).write(event)
+        # self.query_one(RichLog).write(self.app_focus)
+        # self.query_one(RichLog).write(event)
         if event.key in ["w", "up"]:
             pass
         elif event.key in ["s", "down"]:
@@ -317,6 +372,21 @@ class OKITui(App):
             self.query_one(RichLog).clear()
         elif event.key == "u":
             self.query_one(ProgressBar).advance()
+
+
+    @on(OKIListView.Selected)
+    def handle_installer(self, message:OKIListView.Selected) -> None:
+        self.query_one(RichLog).write(f"Message:{message._installer}")
+        installer = message._installer()
+
+        # pre install
+
+        # install 
+        self.container_right.set_installer_name(installer.PACKAGE_NAME)
+        for k, v in installer._install.commands.items():
+            self.container_right.set_title(k)
+            time.sleep(1)
+        pass
 
 
 if __name__ == "__main__":

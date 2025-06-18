@@ -23,8 +23,9 @@ class ToolRegistry:
             for key in keys:
                 _keys.append(key)
                 if key not in _commands_dict:
-                    _commands_dict[key] = {}
-                    _commands_dict = _commands_dict[key]
+                    if key != keys[-1]:
+                        _commands_dict[key] = {}
+                        _commands_dict = _commands_dict[key]
                 else:
                     if key == keys[-1]: # 检查实际参数是否已经被注册
                         raise ValueError(f"{'.'.join(_keys)} is already registered")

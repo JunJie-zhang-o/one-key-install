@@ -10,12 +10,12 @@ from onekeyinstall.utils import ShellExecutor
 
 @dataclass
 class SystemPackageManagerCMD:
-    install:Union[str, List[str]] 
-    list:Union[str, List[str]]  
-    update:Union[str, List[str]]  
-    remove:Union[str, List[str]]  
-    search:Union[str, List[str]]  
-    show:Union[str, List[str]]  
+    install   : Union[str, List[str]]
+    list      : Union[str, List[str]]
+    update    : Union[str, List[str]]
+    remove    : Union[str, List[str]]
+    search    : Union[str, List[str]]
+    show      : Union[str, List[str]]
 
 
 
@@ -76,14 +76,14 @@ apk                 = SystemPackageManagerCMD(
 
 
 PackageManager = {
-    "ubuntu": apt,
-    "debian": apt,
-    "fedora": dnf,
-    "centos": yum,
-    "alpine": apk,
-    "opensuse": zypper,
-    "suse": zypper,
-    "arch": pacman,
+    "ubuntu"    : apt,
+    "debian"    : apt,
+    "fedora"    : dnf,
+    "centos"    : yum,
+    "alpine"    : apk,
+    "opensuse"  : zypper,
+    "suse"      : zypper,
+    "arch"      : pacman,
 }
 
 

@@ -42,6 +42,10 @@ class Installer(ABC):
         self._dependency:List[Installer]      = []
 
 
+        self.register_install()
+        self.register_uninstall()
+
+
     @abstractmethod
     def register_install(self):
         self._install.add(self.pm_executor.get_cmd("install", self.PACKAGE_NAME), lambda:self.pm_executor.install(self.PACKAGE_NAME))
@@ -49,7 +53,7 @@ class Installer(ABC):
 
     @abstractmethod
     def register_uninstall(self):
-        self._uninstall.add(self.pm_executor.get_cmd("remove", self.PACKAGE_NAME), lambda:self.pm_executor.install(self.PACKAGE_NAME))
+        self._uninstall.add(self.pm_executor.get_cmd("remove", self.PACKAGE_NAME), lambda:self.pm_executor.remove(self.PACKAGE_NAME))
     
 
     @abstractmethod

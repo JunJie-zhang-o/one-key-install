@@ -24,6 +24,9 @@ distribution = true
 
 
 [project.scripts]
-OneKeyInstall = "one_key_install:main"
+OneKeyInstall = "onekeyinstall.cli:main"
 [dependency-groups]
-dev = ["textual-dev>=1.6.1"]
+dev = [
+    "textual-dev>=1.6.1",
+    "pyinstaller>=4.5.1",
+]
