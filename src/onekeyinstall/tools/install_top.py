@@ -61,3 +61,16 @@ class InstallNvitop(Installer):
             # InstallNvitop 是一个终端工具 
         """
         return  md
+    
+
+class Test:
+
+    def __init__(self):
+        self.test = 1
+
+if __name__ == "__main__":
+
+    btop = InstallBtop()
+
+    # for i in btop._install
+    print(btop)

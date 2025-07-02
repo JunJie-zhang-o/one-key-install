@@ -19,3 +19,5 @@ class InstallTerminator(Installer):
 
 # todo:配置文件的更新
 # todo:字体的依赖安装
+
+# todo：快捷键的添加

@@ -6,6 +6,44 @@ import platform
 from enum import Enum
 from typing import Union
 
+
+
+class Singleton:
+    _instance = None
+
+    def __new__(cls, *args, **kwargs):
+        if cls._instance is None:
+            # 创建唯一实例
+            cls._instance = super().__new__(cls)
+        return cls._instance
+
+
+class OKILogging(Singleton):
+
+
+    def __init__(self):
+        if not hasattr(self, "logger"):
+            self.logger = Queue()
+
+    
+    def info(self, msg):
+        self.logger.put(msg)
+
+
+    @classmethod
+    def getLogger(cls):
+        return cls()
+    
+
+    def read(self):
+        if not self.logger.empty():
+            ret = ""
+            while not self.logger.empty():
+                ret += self.logger.get_nowait()
+            return ret
+
+
+
 class LinuxDistroVersion(str, Enum):
     # Ubuntu
     UBUNTU_24_04 = "Ubuntu 24.04"
@@ -136,9 +174,16 @@ class RequireTool:
 import select
 import subprocess
 from typing import Union, List
+from queue import Queue
+from threading import Condition, Thread
 
 
-class ShellExecutor:
+
+logger = OKILogging.getLogger()
+
+import pty
+
+class ShellExecutor():
     def __init__(self, capture_output=False, verbose=True, check=False):
         """
         :param capture_output: 是否捕获输出（如需获取返回内容）
@@ -148,6 +193,13 @@ class ShellExecutor:
         self.capture_output = capture_output
         self.verbose = verbose
         self.check = check
+        # super().__init__(daemon=True)
+
+        self.condition = Condition()
+        self.stdout_lines = Queue()
+        self.stderr_lines = Queue()
+
+        self.return_code = -1
 
     def run(self, cmd: Union[str, List[str]]):
         """
@@ -155,6 +207,11 @@ class ShellExecutor:
         :param cmd: 要执行的命令，可以是字符串或字符串列表
         :return: subprocess.CompletedProcess 对象
         """
+        # self.stdout_lines.
+        # self.return_code = -1
+        # with self.stdout_lines.mutex:
+        #     self.stdout_lines.queue.clear()
+
         shell = isinstance(cmd, str)
 
         try:
@@ -183,7 +240,11 @@ class ShellExecutor:
                             prefix = "[stdout]" if fd == process.stdout else "[stderr]"
                             print(f"{prefix} {line.strip()}")
                         if self.capture_output:
-                            stdout_lines.append(line) if fd == process.stdout else stderr_lines.append(line)
+                            # with self.condition:
+                                # stdout_lines.append(line) if fd == process.stdout else stderr_lines.append(line)
+                                logger.info(line) 
+                                # self.stdout_lines.put(line) if fd == process.stdout else self.stderr_lines.put(line)
+                                # self.condition.notify()
                     # if fd == process.stderr.fileno():
                     #     line = process.stderr.readline()
                     #     if line:
@@ -201,11 +262,15 @@ class ShellExecutor:
             if self.check and returncode != 0:
                 raise subprocess.CalledProcessError(returncode, cmd)
 
-            return returncode
+            # return returncode
+            # with self.condition:
+            #     self.return_code = returncode
+            #     self.condition.notify_all()
         except subprocess.CalledProcessError as e:
             print(f"命令执行失败: {e}")
             return e
-
+        
+    
 
 
 
@@ -248,6 +313,6 @@ def get_shell_executor():
 
 if __name__ == '__main__':
     executor = ShellExecutor(capture_output=True, verbose=True, check=True)
-    result = executor.run("ls -l")
+    result = executor.run("ls -l --color=always")
     # print(result.stdout)
 

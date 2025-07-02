@@ -13,14 +13,16 @@ from textual.reactive import reactive
 from textual.screen import ModalScreen, Screen
 from textual.widgets import (Button, Footer, Header, Label, ListItem, ListView,
                              MarkdownViewer, ProgressBar, RichLog, Rule,
-                             Static)
+                             Static, TextArea)
 from textual.widgets._header import HeaderTitle
 
 from onekeyinstall import _version
 from onekeyinstall.installer import Installer
 from onekeyinstall.registry import ToolRegistry
-from onekeyinstall.utils import System, get_shell_executor
+from onekeyinstall.utils import OKILogging, System, get_shell_executor
+from rich.pretty import Pretty
 
+logger = OKILogging.getLogger()
 
 class OKIHeader(Header):
 
@@ -139,7 +141,12 @@ class OKIListView(Widget):
         # TODO 实际的逻辑应该OKI中去,不建议在这里进行处理
         if event.key in ["right", "d"]:
             if self.current_selected not in self._selected:
-                self._selected += self.current_selected
+                # TODO 逻辑有问题,在最后一个层级的时候,依旧会添加子类
+                if self._selected == "":
+                    self._selected += f"{self.current_selected}"
+                else:
+                    self._selected += f".{self.current_selected}"
+                    
                 next_items = ToolRegistry.get(self._selected)
                 if type(next_items) is dict:
                     await self.update_items(next_items)
@@ -162,6 +169,7 @@ class OKIListView(Widget):
                     self.post_message(self.Selected(_cls))
             if _cls:
                 self.app.push_screen(OKITipsScreen("123"), check_tip_screen_ret)
+                # event.
 
         
 
@@ -182,6 +190,7 @@ class OKIRichLog(Widget):
         
         self._text = MarkdownViewer(Path(self.DEFAULT_OKI_DESC_FILE_PATH).read_text(), show_table_of_contents=False)
         self._rich_log = RichLog(id="log")
+        # self._rich_log = TextArea.code_editor("", language="shell")
         self._rich_log.can_focus = False
         self._rich_log.styles.height = "1fr"
         self._rich_log.styles.overflow_y = "auto"
@@ -190,8 +199,8 @@ class OKIRichLog(Widget):
         self._title = Label()
         with Vertical(id="vertical_log"):
             yield self._text
-            yield Rule()
-            yield self._title
+            # yield Rule()
+            # yield self._title
             yield self._rich_log
             yield self._progress_bar
             # yield Label("Item 1")
@@ -269,16 +278,25 @@ class OKITipsScreen(ModalScreen[bool]):
 
 
     def compose(self) -> ComposeResult:
+        btn1 = Button(self.btn1_str, variant="error", id="btn1")
+        btn1.active_effect_duration = 0     # 去除初始化后默认样式显示被按下
+        btn2 = Button(self.btn2_str, variant="primary", id="btn2")
         yield Grid(
             Label(self.tips, id="question"),
-            Button(self.btn1_str, variant="error", id="btn1"),
-            Button(self.btn2_str, variant="primary", id="btn2"),
+            btn1,
+            btn2,
+            # Button(self.btn2_str, variant="primary", id="btn2"),
             id="tips-dialog",
         )
 
     def on_mount(self, event):
-        self.query_one("#btn1").focus()
-        self.query_one("#btn2").remove_class("focused")
+        # self.query_one("#btn1").focus()
+        # self.query_one("#btn2").remove_class("focused")
+        # self.query_one("#tips-dialog").focus()
+        # self.query_one("#btn1").remove_class("-active")
+        self.query_one("#question").add_class("-active")
+        self.query_one("#btn2").has_focus
+        pass
 
     def on_key(self, event: events.Key) -> None:
         """Handle keyboard events for button selection."""
@@ -334,6 +352,7 @@ class OKITui(App):
         self.container_left = OKIListView()
         self.container_right = OKIRichLog()
 
+
     def compose(self) -> ComposeResult:
         yield OKIHeader()
         with Vertical(id="app-vertical"):
@@ -347,6 +366,7 @@ class OKITui(App):
         self.exit()
 
     def on_mount(self) -> None:
+        self.timer = self.set_interval(1 / 100, self.read_log, pause=True)
         # self.screen.styles.background = "darkblue"
         # self.screen.styles.border
         # self.widget1.styles.height = "2fr"    # 通过使用fr进行区域的总等分
@@ -376,17 +396,30 @@ class OKITui(App):
 
     @on(OKIListView.Selected)
     def handle_installer(self, message:OKIListView.Selected) -> None:
-        self.query_one(RichLog).write(f"Message:{message._installer}")
+        # self.query_one(RichLog).write(f"Message:{message._installer}")
         installer = message._installer()
-
+        self.timer.resume()
         # pre install
 
         # install 
-        self.container_right.set_installer_name(installer.PACKAGE_NAME)
+        # self.container_right.set_installer_name(installer.PACKAGE_NAME)
+        # 进度条
+        # 描述
+        # 当前的命令
+        self.container_right._rich_log.border_title = installer.PACKAGE_NAME
         for k, v in installer._install.commands.items():
             self.container_right.set_title(k)
-            time.sleep(1)
+            # time.sleep(1)
+            v()
         pass
+
+
+    def read_log(self):
+        from rich.text import Text
+        log = logger.read()
+        if log:
+            self.query_one(RichLog).write(Text(log, style="cyan"))
+
 
 
 if __name__ == "__main__":

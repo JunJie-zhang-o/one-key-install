@@ -5,6 +5,11 @@ import platform
 from typing import Dict, Literal, Union
 import os
 
+
+from onekeyinstall.utils import OKILogging as logging
+
+logger = logging.getLogger()
+
 class Shell(ABC):
 
     @classmethod
@@ -153,6 +158,8 @@ class FileHelper:
     @classmethod
     def exists(cls, path) -> bool:
         return Path(path).exists()
+
+
 
 
 if __name__ == "__main__":
